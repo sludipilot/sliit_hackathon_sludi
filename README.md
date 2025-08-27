@@ -70,6 +70,7 @@ Send the public key when creating or updating the OIDC client on SLUDI:
   "clientAuthMethods": ["private_key_jwt"]
 }
 Note: Never send your private key to the frontend or to SLUDI. Keep it strictly in the backend.
+
 3.3 Store Private Key Securely
 •	Node.js backend: config.js or .env
 •	Do not commit to source control
@@ -96,6 +97,7 @@ window._env_ = {
   PROMPT: "consent",
   GRANT_TYPE: "authorization_code"
 };
+
 4.2 Flow
 1.	User clicks “Sign in with SLUDI”
 2.	Frontend redirects to:
@@ -105,6 +107,7 @@ redirect_uri=http://localhost:5000/userprofile&
 response_type=code&
 scope=openid profile resident-service&
 acr_values=mosip:idp:acr:generated-code mosip:idp:acr:biometrics mosip:idp:acr:static-code
+
 3.	eSignet returns authorization_code to your frontend redirect URI.
 4.	Frontend calls backend (/fetchUserInfo) with authorization_code.
 ________________________________________
@@ -117,6 +120,7 @@ app.post("/fetchUserInfo", async (req, res) => {
   const userInfo = await get_GetUserInfo(tokenResponse.access_token);
   res.json(userInfo);
 });
+
 5.2 Token Request
 const request = new URLSearchParams({
   code: code,
@@ -126,6 +130,7 @@ const request = new URLSearchParams({
   client_assertion_type: CLIENT_ASSERTION_TYPE,
   client_assertion: await generateSignedJwt(CLIENT_ID)
 });
+
 5.3 Generate Signed JWT
 const privateKey = await jose.importJWK(CLIENT_PRIVATE_KEY, "RS256");
 const jwt = await new jose.SignJWT(payload)
@@ -134,19 +139,24 @@ const jwt = await new jose.SignJWT(payload)
     .setExpirationTime("1h")
     .sign(privateKey);
  
+
 5.4 Fetch User Info
+
 const response = await axios.get(
   `${ESIGNET_SERVICE_URL}/oidc/userinfo`,
   { headers: { Authorization: `Bearer ${access_token}` } }
 );
+
 If eSignet sends JWE, decrypt using your JWE_USERINFO_PRIVATE_KEY.
 ________________________________________
+
 6. Common Pitfalls
 Issue	Cause	Fix
 “Oops! It looks like there’s an issue with the URL”	Mismatch redirect URI	Ensure redirect_uri in frontend, backend, and eSignet client registration match exactly
 TypeError: Buffer.from(...)	Passed Object instead of Base64 string	Store private key in JSON file and import correctly, do not base64 encode full object
 Private key in frontend	Security breach	Never send private key to frontend
 ________________________________________
+
 7. Best Practices
 •	Keep private key offline / secure.
 •	Only the backend signs JWTs.
