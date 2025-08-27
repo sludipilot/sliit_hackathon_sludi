@@ -1,5 +1,22 @@
 SLUDI Integration – Developer Guide
 
+•	Folder Structure
+frontend – React web application
+backend – Node JS application
+  
+•	Requirements - node v20+
+•	How to run frontend:
+	open frontend folder
+	npm i
+	npm start
+	
+•	How to run backend:
+	open frontend folder
+	npm i
+	npm start
+
+(Please Follow the guidelines mentioned below)
+
 1. Overview
 This guide explains how to integrate SLUDI with your system using a Node.js backend and a React frontend. 
 It includes:
@@ -8,6 +25,7 @@ It includes:
 •	OAuth2 / OIDC flows
 •	Common pitfalls & debugging tips
 ________________________________________
+ 
 2. Architecture Overview
 flowchart LR
     FE[Frontend - React] -->|Authorization Code| BE[Backend - Node.js]
@@ -23,6 +41,7 @@ Roles:
 ________________________________________
 
 
+ 
 3. Key Management
 3.1 Generate RSA Key Pair
 Use Node.js jose library or OpenSSL:
@@ -133,5 +152,3 @@ ________________________________________
 •	Only the backend signs JWTs.
 •	Frontend handles only redirection & code.
 •	Use localhost only for dev; update to real domain for production.
-
- 
