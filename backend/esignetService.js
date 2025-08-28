@@ -35,14 +35,16 @@ const post_GetToken = async ({
     client_assertion: await generateSignedJwt(client_id),
   });
   const endpoint = baseUrl + getTokenEndPoint;
-  console.log(baseUrl)
-  console.log(endpoint)
+  console.log(endpoint);
+  console.log(request);
+  
+  
   const response = await axios.post(endpoint, request, {
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
     },
-  });
-  console.log(response.data)
+  }).catch((e)=>console.log(e.message));
+  
   return response.data;
 };
 
@@ -70,16 +72,32 @@ const get_GetUserInfo = async (access_token) => {
 
 async function generateSignedJwt(clientId) {
   const privateKey = await importJWK(CLIENT_PRIVATE_KEY, alg);
+  
+  // Token endpoint URL - THIS IS CRITICAL!
+  const tokenEndpoint = ESIGNET_SERVICE_URL+"/oauth/v2/token";
 
-  const jwt = await new SignJWT({ iss: clientId, sub: clientId, aud: ESIGNET_AUD_URL })
-    .setProtectedHeader({ alg, typ: "JWT" })
+  const jwt = await new SignJWT({
+      iss: clientId,    // Must equal client_id
+      sub: clientId,    // Must equal client_id  
+      aud: tokenEndpoint, // Must be EXACT token endpoint URL
+      jti: generateUniqueId() // REQUIRED: Unique token ID
+    })
+    .setProtectedHeader({ 
+      alg: "RS256",     // Typically RS256 for OAuth
+      typ: "JWT" 
+    })
     .setIssuedAt()
-    .setExpirationTime("1h")
+    .setExpirationTime("5m")  // 5-10 minutes max!
     .sign(privateKey);
 
   return jwt;
 }
 
+// Helper function to generate unique ID
+function generateUniqueId() {
+  return Math.random().toString(36).substring(2) + 
+         Date.now().toString(36);
+}
 
 // const generateSignedJwt = async (clientId) => {
 //   // Set headers for JWT
@@ -136,7 +154,7 @@ const decodeUserInfoResponse = async (userInfoResponse) => {
       }
     }
   }
-  console.log("userInfoResponse", response);
+  // console.log("userInfoResponse", response);
   return await new jose.decodeJwt(response);
 };
 

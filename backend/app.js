@@ -1,7 +1,9 @@
 const express = require("express");
 const { PORT } = require("./config");
+var cors = require('cors')
 const { post_GetToken, get_GetUserInfo } = require("./esignetService");
 const app = express();
+app.use(cors())
 app.use(express.json());
 
 app.get("/", (req, res) => {
@@ -11,6 +13,7 @@ app.get("/", (req, res) => {
 //Token Request Handler
 app.post("/fetchUserInfo", async (req, res) => {
   try {
+    
     const tokenResponse = await post_GetToken(req.body);
     res.send(await get_GetUserInfo(tokenResponse.access_token));
   } catch (error) {
